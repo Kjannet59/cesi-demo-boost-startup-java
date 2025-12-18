@@ -34,6 +34,8 @@ jobs:
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DEPLOY_APPLI_NAME }}:latest
             docker stop ${{ secrets.DEPLOY_APPLI_NAME }} || true
             docker rm ${{ secrets.DEPLOY_APPLI_NAME }} || true
+            # Ensure the Docker network exists on the remote host before running the container
+            docker network inspect app-network >/dev/null 2>&1 || docker network create app-network
             docker run -d --name ${{ secrets.DEPLOY_APPLI_NAME }} \
               -p ${{ secrets.DEPLOY_APPLI_PORT }}:8080 \
               -e MONGODB_COLLECTION_NAME=${{ secrets.MONGODB_COLLECTION_NAME || 'persons' }} \
@@ -44,4 +46,5 @@ jobs:
             docker image prune -af --filter "until=24h"
       - name: Verify deployment
         run: |
-          curl -f http://localhost:${{ secrets.DEPLOY_SERVER }}
+          # Vérifie depuis le runner GitHub Actions que l'application distante répond sur le port exposé
+          curl -f http://${{ secrets.DEPLOY_SERVER }}:${{ secrets.DEPLOY_APPLI_PORT }} || exit 1
