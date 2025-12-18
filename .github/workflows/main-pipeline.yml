@@ -28,7 +28,7 @@ jobs:
 
   secure-iac-dockerfile-scan:
     needs: build-and-test  # Toujours en parallèle
-    uses: ./.github/workflows/secure-iac-dockerfile-scan.yml$
+    uses: ./.github/workflows/secure-iac-dockerfile-scan.yml
 
   build-and-scan-docker:
     needs: [ code-quality-sast, secret-scanning, secure-iac-dockerfile-scan ]
